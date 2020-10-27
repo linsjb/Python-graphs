@@ -1,0 +1,19 @@
+# Plot title
+title:
+
+# Plot axis labels
+x_label: 
+y_label: 
+
+#Plot labels
+labels:
+
+# Data file in .csv format in ./data
+data_file: 
+
+# Plot type = line | bar
+plot_type:
+    
+filename: 
+# Plot file type. NOTICE! .pgf file type need's to be last in the list
+plot_filetypes:
