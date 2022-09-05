@@ -8,16 +8,18 @@ import yaml
 from prodict import Prodict
 import click
 
+
 @click.command()
 @click.option('--config', default='plot.yaml')
 def run(config):
-    with open ('./config/' + config) as config_file:
-        plot_config = Prodict.from_dict(yaml.load(config_file, Loader=yaml.FullLoader))
+    with open('./config/' + config) as config_file:
+        plot_config = Prodict.from_dict(
+            yaml.load(config_file, Loader=yaml.FullLoader))
     plot_data = {
         'x': None,
         'y': []
     }
-    with open ('./data/' + plot_config.data_file, newline='') as data_file:
+    with open('./data/' + plot_config.data_file, newline='') as data_file:
         csv_reader = csv.reader(data_file, delimiter=',')
         counter = 0
         for row in csv_reader:
@@ -31,28 +33,33 @@ def run(config):
         barPlot(plot_config, plot_data)
     elif(plot_config.plot_type == 'line'):
         linePlot(plot_config, plot_data, 2)
-    
+
+
 def linePlot(config, data, width):
     plt.close()
+    plt.figure(figsize=(8, 4), dpi=80)
     plt.title(config.title)
     plt.xlabel(config.x_label)
     plt.ylabel(config.y_label)
-    plt.grid(True)
+    # plt.yticks(data['x'], ['blue', 'yellow', 'brown'])
+    plt.grid(False)
+
+    plot_counter = 0
 
     for data_row in data['y']:
-        y_data = [float(y) for y in data_row]
-        plot_counter = 0
-        plt.plot(data['x'], y_data, linewidth = width, label=config.labels[plot_counter])
+        y_data = [y for y in data_row]
+        plt.plot(data['x'], y_data, linewidth=width,
+                 label=config.labels[plot_counter], marker=config.line_markers[plot_counter])
         plot_counter += 1
-
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol=2)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=2)
     plt.tight_layout()
 
     fileTypes(config)
 
+
 def barPlot(config, data):
     width = 0.4
-    
+
     plt.close()
     fig = plt.figure()
     sub_fig = fig.add_subplot(111)
@@ -61,17 +68,21 @@ def barPlot(config, data):
     sub_fig.set_xlabel(config.x_label)
     sub_fig.set_xticks(np.arange(len(data['x'])))
     sub_fig.set_xticklabels(data['x'])
+    sub_fig.xaxis.grid(config.x_grid)
+    sub_fig.yaxis.grid(config.y_grid)
     plot_counter = 0
 
     for data_row in data['y']:
         y_data = [float(y) for y in data_row]
-        sub_fig.bar(np.arange(len(data_row)) + width *plot_counter , y_data, width, align='center', label=config.labels[plot_counter])
+        sub_fig.bar(np.arange(len(data_row)) + width * plot_counter, y_data,
+                    width, align='center', label=config.labels[plot_counter])
         plot_counter += 1
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12), ncol=2)
     plt.tight_layout()
 
     fileTypes(config)
+
 
 def fileTypes(config):
     for filetype in config.plot_filetypes:
@@ -84,6 +95,7 @@ def fileTypes(config):
                 'pgf.rcfonts': False,
             })
         plt.savefig('./out/' + config.filename + filetype)
+
 
 if __name__ == '__main__':
     run()
